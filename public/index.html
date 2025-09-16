@@ -26,13 +26,14 @@
         padding: 1.25rem;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         width: 100%;
+        margin-top: 110px;
       }
       .card-logo {
         position: absolute;
-        top: -220px;
+        top: -200px;
         left: 45%;
-        width: 180px;
-        height: 180px;
+        width: 160px;
+        height: 160px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         z-index: 3;
       }
@@ -44,15 +45,20 @@
         <img src="image.png" class="card-logo" />
         <div class="col-md-6">
           <label for="clientID" class="form-label">ClientID</label>
-          <input type="text" class="form-control" id="clientID" />
+          <input type="text" class="form-control" id="clientID" required />
         </div>
         <div class="col-md-6">
           <label for="secret" class="form-label">Secret</label>
-          <input type="text" class="form-control" id="secret" />
+          <input type="text" class="form-control" id="secret" required />
         </div>
         <div class="col-md-6">
           <label for="inputTennantID" class="form-label">TennantID</label>
-          <input type="text" class="form-control" id="inputTennantID" />
+          <input
+            type="text"
+            class="form-control"
+            id="inputTennantID"
+            required
+          />
         </div>
 
         <div class="col-md-6">
@@ -62,18 +68,32 @@
             class="form-control"
             id="inputSenderEmail"
             placeholder="Sender email here"
+            required
           />
         </div>
 
         <div class="col-md-6">
-          <label for="recieverEmail" class="form-label">Reciever email</label>
+          <label for="recieverEmail" class="form-label">Reciver email</label>
           <input
             type="email"
             class="form-control"
             id="recieverEmail"
             placeholder="Reciever email here"
+            required
           />
         </div>
+
+        <div class="col-md-6">
+          <label for="inputSubject" class="form-label">Subject</label>
+          <input
+            type="text"
+            class="form-control"
+            id="inputSubject"
+            placeholder="Enter subject"
+            required
+          />
+        </div>
+
         <div class="col-12">
           <label for="inputDescription" class="form-label">Description</label>
           <textarea
@@ -81,10 +101,22 @@
             id="inputDescription"
             rows="4"
             placeholder="Description here"
+            required
           ></textarea>
         </div>
 
         <div class="col-12 col-md-6 offset-md-3">
+          <div class="mb-3">
+            <label for="formFile" class="form-label"
+              >Add attachments here</label
+            >
+            <input
+              class="form-control form-control-md"
+              id="formFile"
+              type="file"
+              multiple
+            />
+          </div>
           <button type="submit" class="btn btn-success w-100 btn-md">
             Send email
           </button>
@@ -99,24 +131,58 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const payload = {
-      clientID: document.getElementById("clientID").value,
-      secret: document.getElementById("secret").value,
-      inputTennantID: document.getElementById("inputTennantID").value,
-      inputSenderEmail: document.getElementById("inputSenderEmail").value,
-      recieverEmail: document.getElementById("recieverEmail").value,
-      inputDescription: document.getElementById("inputDescription").value,
-    };
-    console.log(JSON.stringify(payload));
+    const formData = new FormData();
+
+    formData.append("clientID", document.getElementById("clientID").value);
+    formData.append("secret", document.getElementById("secret").value);
+    formData.append(
+      "inputTennantID",
+      document.getElementById("inputTennantID").value
+    );
+    formData.append(
+      "inputSenderEmail",
+      document.getElementById("inputSenderEmail").value
+    );
+    formData.append(
+      "recieverEmail",
+      document.getElementById("recieverEmail").value
+    );
+    formData.append(
+      "inputSubject",
+      document.getElementById("inputSubject").value
+    );
+    formData.append(
+      "inputDescription",
+      document.getElementById("inputDescription").value
+    );
+
+    const fileInput = document.getElementById("formFile");
+
+    //debug print
+    console.log(fileInput.files.length);
+    if (fileInput.files.length > 0) {
+      for (let i = 0; i < fileInput.files.length; i++) {
+        const file = fileInput.files[i];
+        // log file details for debugging
+
+        console.log({ name: file.name, type: file.type });
+        formData.append("attachments", fileInput.files[i]);
+      }
+    }
+
     try {
-      await fetch("/submit", {
+      const response = await fetch("/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData,
       });
-      console.log(" > > > Sent to server");
-    } catch {
-      console.error(" >  > > Failed to send", error);
+
+      if (response.ok) {
+        alert("Email sent succesfully!");
+      } else {
+        alert("Failed to send email");
+      }
+    } catch (error) {
+      console.error(" Failed to send", error);
     }
   });
 </script>
