@@ -2,7 +2,7 @@
 Clone the repo and install dependencies:
 ```bash
 git clone https://github.com/tincaandrei/mail-send.git
-cd mail-sned
+cd mail-send
 npm install
 
 ```
