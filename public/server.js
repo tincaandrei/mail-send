@@ -31,8 +31,23 @@ app.post("/submit", upload.array("attachments"), async (req, res) => {
         : [],
     };
     // console.log(emailData);
-    sendEmail(emailData);
-    res.status(200).json({ message: "Email sent succesfully" });
+    const result = await sendEmail(emailData);
+    if (result.success) {
+      return res.status(200).json({
+        ok: true,
+        message: result.message,
+      });
+    } else {
+      return res.status(result.status || 500).json({
+        ok: false,
+        error: {
+          description: result.description || "Failed to send email.",
+          code: result.code,
+          traceId: result.traceId,
+          correlationId: result.correlationId,
+        },
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
